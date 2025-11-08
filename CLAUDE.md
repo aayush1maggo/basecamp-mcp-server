@@ -101,6 +101,9 @@ Implemented tools:
 - `list_projects`: List all projects with pagination
 - `get_project`: Get single project with dock details
 
+**People**
+- `get_people`: List all people in the account (useful for getting person IDs for assignments)
+
 **To-do Sets & Lists**
 - `get_todoset`: Get to-do set container
 - `get_todolists`: List all to-do lists in a set
@@ -115,6 +118,7 @@ Implemented tools:
 - `uncomplete_todo`: Reopen a completed to-do
 
 Not yet implemented (reference API docs):
+- Individual people details
 - To-do groups
 - Message boards and messages
 - Documents and files

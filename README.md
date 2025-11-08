@@ -130,6 +130,19 @@ Reopens a completed to-do by removing its completion status.
 
 **Returns** JSON confirmation that the to-do was marked incomplete.
 
+### `get_people`
+Retrieves all people visible to the authenticated user in the Basecamp account.
+
+**Parameters**
+- None
+
+**Returns** JSON payload with `total_people` count and array of person objects including:
+- Basic info (id, name, email, title, bio, location)
+- Role flags (admin, owner, client, employee)
+- Permissions (can_manage_projects, can_manage_people)
+- Profile data (avatar_url, time_zone, company)
+- Useful for finding person IDs to use in `assignee_ids` when creating/updating to-dos
+
 ## Setup
 
 ### Local Development

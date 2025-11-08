@@ -763,6 +763,45 @@ def complete_todo(bucket_id: int, todo_id: int) -> str:
 
 
 @mcp.tool()
+def get_people() -> str:
+    """
+    Get all people visible to the current user.
+
+    Returns a list of all people in the Basecamp account that the authenticated
+    user has permission to see, including employees, clients, and administrators.
+
+    Returns:
+        JSON string containing all people with their details including:
+        - Basic info (id, name, email_address, title, bio, location)
+        - Role flags (admin, owner, client, employee)
+        - Permissions (can_manage_projects, can_manage_people)
+        - Profile data (avatar_url, time_zone)
+        - Company information
+        - Timestamps (created_at, updated_at)
+        - attachable_sgid for use in assignments
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/people.json"
+        headers = get_basecamp_headers()
+
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        people_data = response.json()
+
+        # Format response
+        result = {
+            "total_people": len(people_data),
+            "people": people_data
+        }
+
+        return json.dumps(result, indent=2)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+@mcp.tool()
 def uncomplete_todo(bucket_id: int, todo_id: int) -> str:
     """
     Mark a to-do as uncompleted (reopen it).
