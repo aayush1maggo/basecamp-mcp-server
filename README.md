@@ -4,26 +4,93 @@ An MCP server built with FastMCP 2.0 that provides tools to interact with the Ba
 
 ## Features
 
-- **List All Projects**: Fetches ALL active projects using automatic pagination (not just the first 15)
-- **Get Single Project**: Retrieve detailed information about a specific project including its dock (available tools)
+- **Project Discovery**: List every visible Basecamp project with automatic pagination (no 15-item cap)
+- **Project Detail View**: Fetch a single project including its dock metadata and tool endpoints
+- **To-do Overview**: Browse to-do sets and lists with the same pagination support used for projects
+- **Task Drill-down**: Inspect individual to-do lists and tasks with rich metadata, assignments, and scheduling
+- **Task Creation**: Create new to-dos with optional assignees, subscribers, due dates, and notification control
 
 ## Tools
 
 ### `list_projects`
-Lists all active projects visible to the current user with full pagination support.
+Lists all projects visible to the authenticated user using full pagination so you never miss items.
 
-**Parameters:**
-- `status` (optional): Filter by project status ("archived" or "trashed"). Defaults to active projects.
+**Parameters**
+- `status` (optional): Filter projects by status; accepts `archived` or `trashed`. Defaults to active.
 
-**Returns:** JSON containing all projects with metadata
+**Returns** JSON payload with `total_projects`, the applied filter, and the full project list.
 
 ### `get_project`
-Gets detailed information for a specific project.
+Fetches a single project, including dock information that reveals which Basecamp tools are enabled.
 
-**Parameters:**
-- `project_id` (required): The ID of the project to retrieve
+**Parameters**
+- `project_id` (required): Numeric ID of the project.
 
-**Returns:** JSON containing comprehensive project details including the dock (message boards, to-dos, docs, chat, etc.)
+**Returns** JSON blob mirroring the Basecamp API response with metadata, dock entries, and URLs.
+
+### `get_todoset`
+Retrieves a to-do set for a given project (bucket). Use this to discover the to-do lists available within the set.
+
+**Parameters**
+- `bucket_id` (required): Project or bucket ID (same as `project_id`).
+- `todoset_id` (required): ID of the to-do set, obtainable from `get_project`.
+
+**Returns** JSON object with to-do set metadata, statistics, and URLs for downstream queries.
+
+### `get_todolists`
+Lists all to-do lists within a to-do set with pagination handled automatically.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todoset_id` (required): To-do set ID.
+- `status` (optional): Filter lists by `archived` or `trashed`. Defaults to active.
+
+**Returns** JSON payload with counts, filters, and the full list collection.
+
+### `get_todolist`
+Fetches a single to-do list with complete metadata and navigation links.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todolist_id` (required): ID of the list.
+
+**Returns** JSON object describing the list, completion info, parent references, and URLs.
+
+### `get_todos`
+Retrieves every to-do within a list, supporting status and completion filters.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todolist_id` (required): ID of the parent list.
+- `status` (optional): Filter by `archived` or `trashed`.
+- `completed` (optional): `true` for completed tasks, `false` for pending.
+
+**Returns** JSON payload with totals, filters, and all matching to-dos.
+
+### `get_todo`
+Gets a single to-do with full detail, including assignments, visibility, scheduling, and action URLs.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todo_id` (required): ID of the to-do.
+
+**Returns** JSON object reflecting the Basecamp to-do schema.
+
+### `create_todo`
+Creates a new to-do inside a list, supporting optional metadata aligned with Basecamp’s API.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todolist_id` (required): Destination list ID.
+- `content` (required): Task title/summary.
+- `description` (optional): Rich HTML description.
+- `assignee_ids` (optional): List of person IDs to assign.
+- `completion_subscriber_ids` (optional): People to notify on completion.
+- `notify` (optional): Boolean to trigger assignment notifications.
+- `due_on` (optional): Due date in `YYYY-MM-DD`.
+- `starts_on` (optional): Start date in `YYYY-MM-DD`.
+
+**Returns** JSON payload including the created to-do data and status marker.
 
 ## Setup
 
