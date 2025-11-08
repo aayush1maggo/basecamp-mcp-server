@@ -18,17 +18,39 @@ TOKEN_FILE = os.path.join(os.path.dirname(__file__), "token.json")
 
 def load_token() -> dict:
     """
-    Load the access token from token.json file.
+    Load the access token from environment variables or token.json file.
+
+    Priority:
+    1. Environment variables (BASECAMP_ACCESS_TOKEN, etc.)
+    2. token.json file
 
     Returns:
         Dictionary containing token information
     """
+    # Try to load from environment variables first
+    access_token = os.getenv("BASECAMP_ACCESS_TOKEN")
+    if access_token:
+        return {
+            "access_token": access_token,
+            "refresh_token": os.getenv("BASECAMP_REFRESH_TOKEN", ""),
+            "expires_at": os.getenv("BASECAMP_TOKEN_EXPIRES_AT", ""),
+            "account_id": os.getenv("BASECAMP_ACCOUNT_ID", ""),
+            "source": "environment"
+        }
+
+    # Fallback to token.json file
     try:
         with open(TOKEN_FILE, 'r') as f:
             token_data = json.load(f)
-            return token_data.get("basecamp", {})
+            data = token_data.get("basecamp", {})
+            data["source"] = "file"
+            return data
     except FileNotFoundError:
-        raise ValueError(f"Token file not found at {TOKEN_FILE}")
+        raise ValueError(
+            f"No token found. Either:\n"
+            f"1. Set BASECAMP_ACCESS_TOKEN environment variable, or\n"
+            f"2. Provide token.json file at {TOKEN_FILE}"
+        )
     except json.JSONDecodeError:
         raise ValueError(f"Invalid JSON in token file at {TOKEN_FILE}")
 
@@ -37,12 +59,32 @@ def save_token(token_data: dict) -> None:
     """
     Save updated token data to token.json file.
 
+    Note: This only saves to file. If using environment variables,
+    token refresh will work but the new token won't be persisted.
+
     Args:
         token_data: Dictionary containing token information
     """
-    data = {"basecamp": token_data}
-    with open(TOKEN_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+    # Only save to file if we have a source field indicating file-based storage
+    # or if no source is specified (backward compatibility)
+    source = token_data.get("source", "file")
+
+    if source == "environment":
+        # Skip saving when using environment variables
+        # The token refresh will work for the current session
+        return
+
+    # Remove source field before saving
+    save_data = {k: v for k, v in token_data.items() if k != "source"}
+    data = {"basecamp": save_data}
+
+    try:
+        with open(TOKEN_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        # Don't fail if we can't save to file when using env vars
+        if source == "file":
+            raise
 
 
 def refresh_access_token(refresh_token: str, client_id: str, client_secret: str, redirect_uri: str) -> dict:
@@ -99,14 +141,14 @@ def get_valid_token() -> str:
             # Refresh the token
             new_token_data = refresh_access_token(refresh_token, client_id, client_secret, redirect_uri)
 
-            # Update token file
+            # Update token data (preserves 'source' field)
             token_data.update({
                 "access_token": new_token_data.get("access_token"),
                 "refresh_token": new_token_data.get("refresh_token", refresh_token),
                 "expires_at": new_token_data.get("expires_at"),
                 "updated_at": datetime.now().isoformat()
             })
-            save_token(token_data)
+            save_token(token_data)  # Will only save to file if source != "environment"
             access_token = new_token_data.get("access_token")
 
     if not access_token:

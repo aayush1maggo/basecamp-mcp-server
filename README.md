@@ -27,6 +27,8 @@ Gets detailed information for a specific project.
 
 ## Setup
 
+### Local Development
+
 1. Install dependencies:
 ```bash
 pip install -r requirements.txt
@@ -38,14 +40,55 @@ cp .env.example .env
 ```
 
 3. Get your Basecamp credentials:
-   - **Access Token**: Visit https://launchpad.37signals.com/integrations
+   - **OAuth App**: Create at https://launchpad.37signals.com/integrations
    - **Account ID**: Find it in your Basecamp URL (https://3.basecamp.com/YOUR_ACCOUNT_ID)
 
-4. Update `.env` with your credentials:
+4. Configure authentication using **one of two methods**:
+
+   **Method A: token.json file** (recommended for local)
+   - Obtain OAuth tokens through the OAuth flow
+   - Create `token.json` with the following structure:
+   ```json
+   {
+     "basecamp": {
+       "access_token": "your_access_token",
+       "refresh_token": "your_refresh_token",
+       "expires_at": "2025-12-31T23:59:59Z",
+       "account_id": "your_account_id"
+     }
+   }
+   ```
+
+   **Method B: Environment variables** (recommended for cloud deployment)
+   - Set these in your `.env` file:
+   ```
+   BASECAMP_ACCESS_TOKEN=your_access_token_here
+   BASECAMP_REFRESH_TOKEN=your_refresh_token_here
+   BASECAMP_TOKEN_EXPIRES_AT=2025-12-31T23:59:59Z
+   BASECAMP_ACCOUNT_ID=your_account_id_here
+   BASECAMP_CLIENT_ID=your_client_id
+   BASECAMP_CLIENT_SECRET=your_client_secret
+   BASECAMP_REDIRECT_URI=your_redirect_uri
+   USER_AGENT="Your App Name (your@email.com)"
+   ```
+
+### FastMCP Cloud Deployment
+
+For FastMCP Cloud, use environment variables only:
+
+**Required Environment Variables:**
 ```
-BASECAMP_ACCOUNT_ID=1234567890
-BASECAMP_ACCESS_TOKEN=your_token_here
+BASECAMP_ACCESS_TOKEN=your_access_token
+BASECAMP_REFRESH_TOKEN=your_refresh_token
+BASECAMP_TOKEN_EXPIRES_AT=2025-12-31T23:59:59Z
+BASECAMP_ACCOUNT_ID=your_account_id
+BASECAMP_CLIENT_ID=your_oauth_client_id
+BASECAMP_CLIENT_SECRET=your_oauth_client_secret
+BASECAMP_REDIRECT_URI=your_redirect_uri
+USER_AGENT="Your App Name (your@email.com)"
 ```
+
+The server will automatically refresh tokens when they expire (as long as OAuth credentials are provided).
 
 ## Running the Server
 
@@ -53,7 +96,16 @@ BASECAMP_ACCESS_TOKEN=your_token_here
 python server.py
 ```
 
-The server runs using stdio transport, suitable for MCP client integration.
+The server runs using **HTTP transport** on `http://0.0.0.0:8000`, suitable for FastMCP Cloud deployment.
+
+**Note:** If you need stdio transport for local MCP client integration (e.g., Claude Desktop), change line 604 in `server.py`:
+```python
+# For FastMCP Cloud (current):
+mcp.run(transport="http", host="0.0.0.0", port=8000)
+
+# For local MCP client:
+mcp.run(transport="stdio")
+```
 
 ## Pagination
 
