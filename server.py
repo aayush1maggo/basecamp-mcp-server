@@ -841,5 +841,195 @@ def uncomplete_todo(bucket_id: int, todo_id: int) -> str:
         return json.dumps({"error": str(e)}, indent=2)
 
 
+@mcp.tool()
+def get_comments(bucket_id: int, recording_id: int) -> str:
+    """
+    Get all comments on a recording (resource).
+
+    Comments can be added to various Basecamp resources like messages, to-dos, documents, etc.
+    Any resource with 'comments_count' and 'comments_url' attributes can have comments.
+
+    This tool fetches ALL comments using pagination.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        recording_id: The ID of the recording/resource to get comments for
+
+    Returns:
+        JSON string containing all comments with their details including:
+        - Comment metadata (id, status, created_at, updated_at)
+        - Creator information with full user details
+        - HTML-formatted content
+        - Parent resource reference
+        - Visibility status for clients
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/recordings/{recording_id}/comments.json"
+
+        # Fetch all pages
+        comments = fetch_all_pages(url)
+
+        # Format response
+        response = {
+            "total_comments": len(comments),
+            "bucket_id": bucket_id,
+            "recording_id": recording_id,
+            "comments": comments
+        }
+
+        return json.dumps(response, indent=2)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+@mcp.tool()
+def get_comment(bucket_id: int, comment_id: int) -> str:
+    """
+    Get a single comment with complete details.
+
+    Returns comprehensive information about a specific comment including
+    the comment content, creator information, and parent resource details.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        comment_id: The ID of the comment to retrieve
+
+    Returns:
+        JSON string containing detailed comment information including:
+        - Comment metadata (id, status, created_at, updated_at)
+        - Creator information with full user details
+        - HTML-formatted content
+        - Parent resource reference (the commented-upon item)
+        - Bucket information
+        - Visibility status for clients
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/comments/{comment_id}.json"
+        headers = get_basecamp_headers()
+
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        comment_data = response.json()
+
+        return json.dumps(comment_data, indent=2)
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return json.dumps({
+                "error": f"Comment with ID {comment_id} not found in bucket {bucket_id}"
+            }, indent=2)
+        else:
+            return json.dumps({
+                "error": f"HTTP error: {str(e)}",
+                "details": e.response.text if hasattr(e, 'response') else None
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+@mcp.tool()
+def create_comment(bucket_id: int, recording_id: int, content: str) -> str:
+    """
+    Create a new comment on a recording (resource).
+
+    Publishes a comment under a specific recording. All people who are subscribed
+    to the recording will be notified when the comment is posted.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        recording_id: The ID of the recording/resource to comment on
+        content: The comment content (supports HTML for rich text formatting)
+
+    Returns:
+        JSON string containing the created comment object with status 201 Created.
+        The response includes all comment details including the assigned ID,
+        timestamps, creator information, and formatted content.
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/recordings/{recording_id}/comments.json"
+        headers = get_basecamp_headers()
+
+        # Build request body
+        payload = {
+            "content": content
+        }
+
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+
+        comment_data = response.json()
+
+        return json.dumps({
+            "status": "created",
+            "comment": comment_data
+        }, indent=2)
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return json.dumps({
+                "error": f"Recording with ID {recording_id} not found in bucket {bucket_id}"
+            }, indent=2)
+        else:
+            return json.dumps({
+                "error": f"HTTP error: {str(e)}",
+                "details": e.response.text if hasattr(e, 'response') else None
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+@mcp.tool()
+def update_comment(bucket_id: int, comment_id: int, content: str) -> str:
+    """
+    Update an existing comment's content.
+
+    Modifies the content of a previously posted comment. The comment's
+    updated_at timestamp will be changed to reflect the modification.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        comment_id: The ID of the comment to update
+        content: The updated comment content (supports HTML for rich text formatting)
+
+    Returns:
+        JSON string containing the updated comment object with status 200 OK.
+        The response includes all comment details with the new content and
+        updated timestamp.
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/comments/{comment_id}.json"
+        headers = get_basecamp_headers()
+
+        # Build request body
+        payload = {
+            "content": content
+        }
+
+        response = requests.put(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+
+        comment_data = response.json()
+
+        return json.dumps({
+            "status": "updated",
+            "comment": comment_data
+        }, indent=2)
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return json.dumps({
+                "error": f"Comment with ID {comment_id} not found in bucket {bucket_id}"
+            }, indent=2)
+        else:
+            return json.dumps({
+                "error": f"HTTP error: {str(e)}",
+                "details": e.response.text if hasattr(e, 'response') else None
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
 if __name__ == "__main__":
     mcp.run(transport="http", host="0.0.0.0", port=8000)
