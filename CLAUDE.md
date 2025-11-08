@@ -96,17 +96,29 @@ To navigate from project to todos:
 ## Current Tool Coverage
 
 Implemented tools:
+
+**Projects**
 - `list_projects`: List all projects with pagination
 - `get_project`: Get single project with dock details
+
+**To-do Sets & Lists**
 - `get_todoset`: Get to-do set container
 - `get_todolists`: List all to-do lists in a set
 - `get_todolist`: Get single to-do list details
 
+**To-dos (Individual Tasks)**
+- `get_todos`: List all to-dos in a list with pagination and filters
+- `get_todo`: Get single to-do with full details
+- `create_todo`: Create a new to-do with assignments, dates, etc.
+- `update_todo`: Update existing to-do (requires ALL fields to preserve values)
+- `complete_todo`: Mark a to-do as completed
+- `uncomplete_todo`: Reopen a completed to-do
+
 Not yet implemented (reference API docs):
-- Individual to-dos (GET/POST/PUT/DELETE)
 - To-do groups
 - Message boards and messages
 - Documents and files
 - Chat/Campfire
 - Schedule entries
 - Webhooks
+- Comments on recordings

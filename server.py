@@ -642,5 +642,165 @@ def create_todo(
         return json.dumps({"error": str(e)}, indent=2)
 
 
+@mcp.tool()
+def update_todo(
+    bucket_id: int,
+    todo_id: int,
+    content: str,
+    description: Optional[str] = None,
+    assignee_ids: Optional[list] = None,
+    completion_subscriber_ids: Optional[list] = None,
+    notify: Optional[bool] = None,
+    due_on: Optional[str] = None,
+    starts_on: Optional[str] = None
+) -> str:
+    """
+    Update an existing to-do.
+
+    IMPORTANT: You must pass ALL existing parameters in addition to those being updated.
+    Omitting a parameter will clear its value. To preserve existing values, first fetch
+    the to-do with get_todo(), then pass all current values along with your changes.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        todo_id: The ID of the to-do to update
+        content: The to-do task description (required, cannot be blank)
+        description: Optional rich HTML content for detailed description
+        assignee_ids: Optional list of person IDs to assign the to-do to
+        completion_subscriber_ids: Optional list of person IDs to notify on completion
+        notify: Optional boolean to send notifications to assignees
+        due_on: Optional due date in YYYY-MM-DD format
+        starts_on: Optional start date in YYYY-MM-DD format
+
+    Returns:
+        JSON string containing the updated to-do object with status 200 OK
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/todos/{todo_id}.json"
+        headers = get_basecamp_headers()
+
+        # Build request body
+        payload = {
+            "content": content
+        }
+
+        if description is not None:
+            payload["description"] = description
+        if assignee_ids is not None:
+            payload["assignee_ids"] = assignee_ids
+        if completion_subscriber_ids is not None:
+            payload["completion_subscriber_ids"] = completion_subscriber_ids
+        if notify is not None:
+            payload["notify"] = notify
+        if due_on is not None:
+            payload["due_on"] = due_on
+        if starts_on is not None:
+            payload["starts_on"] = starts_on
+
+        response = requests.put(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+
+        todo_data = response.json()
+
+        return json.dumps({
+            "status": "updated",
+            "todo": todo_data
+        }, indent=2)
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return json.dumps({
+                "error": f"To-do with ID {todo_id} not found in bucket {bucket_id}"
+            }, indent=2)
+        else:
+            return json.dumps({
+                "error": f"HTTP error: {str(e)}",
+                "details": e.response.text if hasattr(e, 'response') else None
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+@mcp.tool()
+def complete_todo(bucket_id: int, todo_id: int) -> str:
+    """
+    Mark a to-do as completed.
+
+    This sets the to-do's completion status to true and records who completed it
+    and when. Subscribers will be notified according to the to-do's settings.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        todo_id: The ID of the to-do to complete
+
+    Returns:
+        JSON string with completion confirmation
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/todos/{todo_id}/completion.json"
+        headers = get_basecamp_headers()
+
+        response = requests.post(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        return json.dumps({
+            "status": "completed",
+            "message": f"To-do {todo_id} has been marked as complete"
+        }, indent=2)
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return json.dumps({
+                "error": f"To-do with ID {todo_id} not found in bucket {bucket_id}"
+            }, indent=2)
+        else:
+            return json.dumps({
+                "error": f"HTTP error: {str(e)}",
+                "details": e.response.text if hasattr(e, 'response') else None
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+@mcp.tool()
+def uncomplete_todo(bucket_id: int, todo_id: int) -> str:
+    """
+    Mark a to-do as uncompleted (reopen it).
+
+    This removes the completion status from a to-do, allowing it to be worked on again.
+
+    Args:
+        bucket_id: The project/bucket ID (same as project_id)
+        todo_id: The ID of the to-do to uncomplete
+
+    Returns:
+        JSON string with uncompletion confirmation
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/todos/{todo_id}/completion.json"
+        headers = get_basecamp_headers()
+
+        response = requests.delete(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        return json.dumps({
+            "status": "uncompleted",
+            "message": f"To-do {todo_id} has been marked as incomplete"
+        }, indent=2)
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return json.dumps({
+                "error": f"To-do with ID {todo_id} not found in bucket {bucket_id}"
+            }, indent=2)
+        else:
+            return json.dumps({
+                "error": f"HTTP error: {str(e)}",
+                "details": e.response.text if hasattr(e, 'response') else None
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)}, indent=2)
+
+
 if __name__ == "__main__":
     mcp.run(transport="http", host="0.0.0.0", port=8000)

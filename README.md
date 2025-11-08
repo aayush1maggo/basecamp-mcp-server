@@ -8,7 +8,9 @@ An MCP server built with FastMCP 2.0 that provides tools to interact with the Ba
 - **Project Detail View**: Fetch a single project including its dock metadata and tool endpoints
 - **To-do Overview**: Browse to-do sets and lists with the same pagination support used for projects
 - **Task Drill-down**: Inspect individual to-do lists and tasks with rich metadata, assignments, and scheduling
-- **Task Creation**: Create new to-dos with optional assignees, subscribers, due dates, and notification control
+- **Task Management**: Full CRUD operations on to-dos - create, read, update, complete, and uncomplete tasks
+- **Assignment & Scheduling**: Set assignees, completion subscribers, due dates, and start dates on tasks
+- **Automatic Token Refresh**: OAuth tokens are automatically refreshed when expired (no manual intervention needed)
 
 ## Tools
 
@@ -77,7 +79,7 @@ Gets a single to-do with full detail, including assignments, visibility, schedul
 **Returns** JSON object reflecting the Basecamp to-do schema.
 
 ### `create_todo`
-Creates a new to-do inside a list, supporting optional metadata aligned with Basecamp’s API.
+Creates a new to-do inside a list, supporting optional metadata aligned with Basecamp's API.
 
 **Parameters**
 - `bucket_id` (required): Project/bucket ID.
@@ -91,6 +93,42 @@ Creates a new to-do inside a list, supporting optional metadata aligned with Bas
 - `starts_on` (optional): Start date in `YYYY-MM-DD`.
 
 **Returns** JSON payload including the created to-do data and status marker.
+
+### `update_todo`
+Updates an existing to-do with new values.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todo_id` (required): ID of the to-do to update.
+- `content` (required): Task title/summary (cannot be blank).
+- `description` (optional): Rich HTML description.
+- `assignee_ids` (optional): List of person IDs to assign.
+- `completion_subscriber_ids` (optional): People to notify on completion.
+- `notify` (optional): Boolean to trigger assignment notifications.
+- `due_on` (optional): Due date in `YYYY-MM-DD`.
+- `starts_on` (optional): Start date in `YYYY-MM-DD`.
+
+**Returns** JSON payload with the updated to-do data.
+
+**Important**: You must pass ALL existing parameters along with those being updated. Omitting a parameter will clear its value. Fetch the to-do first with `get_todo()` to preserve existing values.
+
+### `complete_todo`
+Marks a to-do as completed.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todo_id` (required): ID of the to-do to complete.
+
+**Returns** JSON confirmation that the to-do was marked complete.
+
+### `uncomplete_todo`
+Reopens a completed to-do by removing its completion status.
+
+**Parameters**
+- `bucket_id` (required): Project/bucket ID.
+- `todo_id` (required): ID of the to-do to uncomplete.
+
+**Returns** JSON confirmation that the to-do was marked incomplete.
 
 ## Setup
 
