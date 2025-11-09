@@ -3,7 +3,9 @@ import json
 from typing import Optional
 from datetime import datetime
 import requests
+from pathlib import Path
 from fastmcp import FastMCP
+from fastmcp.resources import FileResource
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -1029,6 +1031,130 @@ def update_comment(bucket_id: int, comment_id: int, content: str) -> str:
             }, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=2)
+
+
+# ============================================================================
+# MCP Resources
+# ============================================================================
+
+# Static resource: Expose the cached projects JSON file
+PROJECTS_FILE = Path(__file__).parent / "basecamp-projects.json"
+if PROJECTS_FILE.exists():
+    projects_resource = FileResource(
+        uri="basecamp://projects/cached",
+        path=PROJECTS_FILE,
+        name="Cached Basecamp Projects",
+        description="Cached list of all Basecamp projects (read from basecamp-projects.json)",
+        mime_type="application/json"
+    )
+    mcp.add_resource(projects_resource)
+
+
+@mcp.resource("basecamp://projects/live")
+def get_live_projects() -> dict:
+    """
+    Live Basecamp projects list fetched from the API.
+
+    Returns the current list of active projects directly from Basecamp,
+    including full project details with id, name, and description.
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/projects.json"
+        projects = fetch_all_pages(url)
+
+        return {
+            "total_projects": len(projects),
+            "status": "active",
+            "source": "live_api",
+            "projects": projects
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "total_projects": 0,
+            "projects": []
+        }
+
+
+@mcp.resource("basecamp://project/{project_id}")
+def get_project_resource(project_id: str) -> dict:
+    """
+    Get detailed information for a specific project by ID.
+
+    Returns comprehensive project details including the project's dock
+    (available tools like message boards, to-dos, docs, chat, etc.).
+
+    Args:
+        project_id: The ID of the project to retrieve
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/projects/{project_id}.json"
+        headers = get_basecamp_headers()
+
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return {"error": f"Project with ID {project_id} not found"}
+        else:
+            return {"error": f"HTTP error: {str(e)}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.resource("basecamp://people")
+def get_people_resource() -> dict:
+    """
+    Get all people in the Basecamp account.
+
+    Returns a list of all people visible to the current user,
+    including employees, clients, and administrators.
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/people.json"
+        headers = get_basecamp_headers()
+
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        people_data = response.json()
+
+        return {
+            "total_people": len(people_data),
+            "people": people_data
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.resource("basecamp://todolist/{bucket_id}/{todolist_id}")
+def get_todolist_resource(bucket_id: str, todolist_id: str) -> dict:
+    """
+    Get a specific to-do list with complete details.
+
+    Args:
+        bucket_id: The project/bucket ID
+        todolist_id: The ID of the to-do list
+    """
+    try:
+        url = f"{BASECAMP_API_BASE_URL}/buckets/{bucket_id}/todolists/{todolist_id}.json"
+        headers = get_basecamp_headers()
+
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return {
+                "error": f"To-do list with ID {todolist_id} not found in bucket {bucket_id}"
+            }
+        else:
+            return {"error": f"HTTP error: {str(e)}"}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":

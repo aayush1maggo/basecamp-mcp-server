@@ -1,0 +1,235 @@
+{
+  "total_people": 14,
+  "people": [
+    {
+      "id": 45568443,
+      "name": "Abrar Patel",
+      "email_address": "abrar@apwebsolutions.com.au",
+      "title": "Director & Head of Strategy",
+      "admin": true,
+      "owner": true,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Melbourne",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": true
+    },
+    {
+      "id": 45568453,
+      "name": "Basecamp",
+      "email_address": null,
+      "title": null,
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": false,
+      "time_zone": "Australia/Brisbane",
+      "can_manage_projects": false,
+      "can_manage_people": false
+    },
+    {
+      "id": 45568460,
+      "name": "Angela Brewster",
+      "email_address": "angela@apwebsolutions.com.au",
+      "title": "Senior Account Manager",
+      "admin": true,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Melbourne",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": true
+    },
+    {
+      "id": 45568461,
+      "name": "Roscoe Thorne",
+      "email_address": "roscoe@apwebsolutions.com.au",
+      "title": "Head of SEO",
+      "admin": true,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Brisbane",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": true
+    },
+    {
+      "id": 45576887,
+      "name": "Vijender Kumar Kumawat",
+      "email_address": "vijender@apwebsolutions.com.au",
+      "title": "SEO Specialist",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Asia/Kolkata",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 45596055,
+      "name": "Sandeep Singh",
+      "email_address": "sandeep@apwebsolutions.com.au",
+      "title": "Web Designer & Developer",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Brisbane",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 45921923,
+      "name": "Kevin Dumalo",
+      "email_address": "kevin@apwebsolutions.com.au",
+      "title": "Link Builder",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Asia/Shanghai",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 46958537,
+      "name": "Karolina A.",
+      "email_address": "assikarolina@gmail.com",
+      "title": "Content Writer",
+      "admin": false,
+      "owner": false,
+      "client": true,
+      "employee": false,
+      "time_zone": "America/New_York",
+      "can_manage_projects": false,
+      "can_manage_people": false
+    },
+    {
+      "id": 47054660,
+      "name": "Jonathan Desipeda",
+      "email_address": "jonathan@apwebsolutions.com.au",
+      "title": "Performance Media Specialist",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Brisbane",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 47103552,
+      "name": "Aayush Maggo",
+      "email_address": "aayush@apwebsolutions.com.au",
+      "title": "Senior SEO & Data Analytics Specialist",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Brisbane",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 48384558,
+      "name": "Michaela Fischer",
+      "email_address": "michaela@apwebsolutions.com.au",
+      "title": "Account Manager",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Brisbane",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 50003357,
+      "name": "Jenny Barcoma",
+      "email_address": "jenny@apwebsolutions.com.au",
+      "title": "Executive Assistant to Abrar Patel",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Asia/Shanghai",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 50126799,
+      "name": "Rob Luksic",
+      "email_address": "rob@apwebsolutions.com.au",
+      "title": "Junior Account Manager ",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Australia/Brisbane",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    },
+    {
+      "id": 50137636,
+      "name": "Zienna Maghari",
+      "email_address": "zienna@apwebsolutions.com.au",
+      "title": "SEO Co-ordinator",
+      "admin": false,
+      "owner": false,
+      "client": false,
+      "employee": true,
+      "time_zone": "Asia/Shanghai",
+      "company": {
+        "id": 3591594,
+        "name": "A.P. Web Solutions"
+      },
+      "can_manage_projects": true,
+      "can_manage_people": false
+    }
+  ]
+}

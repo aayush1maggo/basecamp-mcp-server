@@ -117,6 +117,38 @@ Implemented tools:
 - `complete_todo`: Mark a to-do as completed
 - `uncomplete_todo`: Reopen a completed to-do
 
+**Comments**
+- `get_comments`: Get all comments on a recording (to-do, message, etc.)
+- `get_comment`: Get single comment details
+- `create_comment`: Create a new comment on a recording
+- `update_comment`: Update an existing comment
+
+## MCP Resources
+
+Resources provide read-only access to Basecamp data through URI-based endpoints. MCP clients can request these resources directly.
+
+### Available Resources
+
+**Static Resources**
+- `basecamp://projects/cached`: Cached project list from basecamp-projects.json file
+
+**Dynamic Resources**
+- `basecamp://projects/live`: Live project list fetched from Basecamp API
+- `basecamp://project/{project_id}`: Individual project details with dock information
+- `basecamp://people`: List of all people in the account
+- `basecamp://todolist/{bucket_id}/{todolist_id}`: Specific to-do list details
+
+### Resource URI Templates
+
+Resources use RFC 6570 URI templates with parameters:
+- `{project_id}`: Numeric project/bucket ID
+- `{bucket_id}`: Project bucket ID (same as project_id)
+- `{todolist_id}`: To-do list ID
+
+Example usage:
+- `basecamp://project/36501911` - Get "Getting Started" project details
+- `basecamp://todolist/36501911/123456` - Get specific to-do list
+
 Not yet implemented (reference API docs):
 - Individual people details
 - To-do groups
@@ -125,4 +157,3 @@ Not yet implemented (reference API docs):
 - Chat/Campfire
 - Schedule entries
 - Webhooks
-- Comments on recordings
